@@ -1,0 +1,8 @@
+#!/bin/sh
+# Default setup for Narada staging.
+# Use by symlinking as ./…/testdata/staging.setup or by executing from it:
+#   source "$1/../…/staging.setup"
+ln -s "$1/../../bin"
+echo 127.0.0.1:0                        > config/listen
+echo -n                                 > config/basepath
+echo -n                                 > config/real_ip_header

@@ -6,10 +6,8 @@ import (
 	"net/http/httptest"
 	"net/http/httputil"
 
-	"github.com/powerman/narada-go/narada"
+	"../../cfg"
 )
-
-var debug = narada.GetConfigLine("log/level") == "DEBUG"
 
 func logResponse(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +22,7 @@ func logResponse(next http.HandlerFunc) http.HandlerFunc {
 			log.ERR("failed to send response: %s", err)
 		}
 
-		if debug {
+		if cfg.Debug {
 			dump, _ := httputil.DumpRequest(r, true)
 			headers := ""
 			for k, vs := range c.HeaderMap {

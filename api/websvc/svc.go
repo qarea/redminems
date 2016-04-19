@@ -6,12 +6,14 @@ import (
 	"net/http"
 
 	"github.com/powerman/narada-go/narada"
+
+	"../../cfg"
 )
 
 var log = narada.NewLog("")
 
 func init() {
-	http.Handle(basePath+"/web", http.StripPrefix(basePath, http.HandlerFunc(logResponse(web))))
+	http.Handle(cfg.HTTP.BasePath+"/web", http.StripPrefix(cfg.HTTP.BasePath, http.HandlerFunc(logResponse(web))))
 }
 
 func web(w http.ResponseWriter, r *http.Request) {

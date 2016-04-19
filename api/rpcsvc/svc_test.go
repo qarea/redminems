@@ -1,14 +1,10 @@
 package rpcsvc
 
 import (
-	"os"
 	"testing"
 
 	"github.com/powerman/narada-go/narada"
-	"github.com/powerman/narada-go/narada/staging"
 )
-
-func TestMain(m *testing.M) { os.Exit(staging.TearDown(m.Run())) }
 
 func TestVERSION(t *testing.T) {
 	api := RPC{}

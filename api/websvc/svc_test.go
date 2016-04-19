@@ -3,17 +3,11 @@ package websvc
 import (
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"testing"
-
-	"github.com/powerman/narada-go/narada/staging"
 
 	. "gopkg.in/check.v1"
+
+	"../../cfg"
 )
-
-func TestMain(m *testing.M) { os.Exit(staging.TearDown(m.Run())) }
-
-func Test(t *testing.T) { TestingT(t) }
 
 type TestSuite struct {
 	url string
@@ -23,7 +17,7 @@ type TestSuite struct {
 var _ = Suite(&TestSuite{})
 
 func (s *TestSuite) SetUpSuite(c *C) {
-	s.url = "http://websvc.test" + basePath + "/web"
+	s.url = "http://websvc.test" + cfg.HTTP.BasePath + "/web"
 }
 
 func (s *TestSuite) SetUpTest(c *C) {
@@ -43,7 +37,7 @@ func (s *TestSuite) Test404(c *C) {
 		r, err := http.NewRequest("GET", v.url, nil)
 		c.Assert(err, IsNil)
 		r.RemoteAddr = "1.2.3.4:0"
-		r.Header.Set(realIPHeader, "1.2.3.4")
+		r.Header.Set(cfg.HTTP.RealIPHeader, "1.2.3.4")
 		http.DefaultServeMux.ServeHTTP(s.w, r)
 		c.Check(s.w.Code, Equals, 404)
 		c.Check(s.w.Header().Get("Content-Type"), Equals, "text/plain; charset=utf-8")
