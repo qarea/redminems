@@ -10,7 +10,6 @@ import (
 	"syscall"
 
 	"github.com/powerman/narada-go/narada/staging"
-
 	. "gopkg.in/check.v1"
 
 	"../../cfg"
