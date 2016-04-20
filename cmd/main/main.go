@@ -8,9 +8,9 @@ import (
 
 	"github.com/powerman/narada-go/narada"
 
-	_ "../../api/eventsvc/"
-	_ "../../api/rpcsvc/"
-	_ "../../api/websvc/"
+	_ "../../api/eventsvc"
+	_ "../../api/rpcsvc"
+	_ "../../api/websvc"
 	"../../cfg"
 )
 
