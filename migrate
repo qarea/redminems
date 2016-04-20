@@ -1,3 +1,5 @@
+### narada-plugin-go-service
+
 add_config listen           127.0.0.1:0
 add_config basepath
 add_config real_ip_header
