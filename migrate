@@ -279,3 +279,6 @@ exclude_from_backup ./service/*/log/supervise
 ### narada-plugin-socklog
 
 restart log
+
+add_config lock_timeout         1s
+add_config rsa_public_key
