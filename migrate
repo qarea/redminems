@@ -280,5 +280,14 @@ exclude_from_backup ./service/*/log/supervise
 
 restart log
 
-add_config lock_timeout         1s
+### narada-plugin-go-service
+
+add_config http/listen           127.0.0.1:0
+add_config http/basepath         
+add_config http/real_ip_header
+
+### narada-tgms-base
+
+add_config lock_timeout          1s
 add_config rsa_public_key
+

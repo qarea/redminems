@@ -22,7 +22,8 @@ main() {
 		release_project
 		release_migrate
 	else
-		workdir_is_clean || die 'Please commit all changes first, then try again'
+		workdir_is_clean  || die 'Please commit all changes first, then try again'
+	    workdir_is_master || die 'Please change branch: major/minor/patch release possible only in master branch'
 		local version="$(get_version "$1")"             || die 'Failed'
 		if release_version "$version" migrate; then
 			git add migrate                         || die 'Failed'
@@ -68,6 +69,7 @@ release_migrate() {
 
 release_version() {
 	list_versions "$2" | grep -q -x -F "$1" && return 0
+    echo -ne "\nrestart main\n" >> "$2"
 	echo -ne "\nINSTALL\nVERSION $1\n\n" >> "$2"
 }
 
@@ -78,6 +80,10 @@ list_versions() {
 workdir_is_clean() {
 	git update-index -q --refresh --unmerged >/dev/null
 	git diff-index --quiet HEAD
+}
+
+workdir_is_master() {
+    test $(echo "$(git rev-parse --abbrev-ref HEAD)") = "master"
 }
 
 get_version() {

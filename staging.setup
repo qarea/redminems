@@ -6,3 +6,10 @@ ln -s "$1/../../bin"
 # Example:
 #   echo value > config/required
 #   touch var/required.db
+### narada-plugin-go-service
+
+mkdir -p config/http
+
+echo 127.0.0.1:0                        > config/http/listen
+echo 1s                                 > config/lock_timeout
+echo 1                                  > config/rsa_public_key

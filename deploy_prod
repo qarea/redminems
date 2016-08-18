@@ -7,6 +7,9 @@ main() {
 	local path=$DEPLOY_PATH
 	echo "Deploy addr '$addr'"
 	echo "Deploy path '$path'"
+
+	test $# -ne 0 || die "Please pass VERSION to deploy_prod script	"
+
 	local v="${1:-$(< VERSION)}"
 	list_versions | grep -q -x -F "$v"      || die "Version '$v' is not released yet"
 
