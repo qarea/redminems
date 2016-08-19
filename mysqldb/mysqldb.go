@@ -3,8 +3,8 @@ package mysqldb
 import (
 	"fmt"
 
+	"../cfg"
 	"github.com/jmoiron/sqlx"
-	"gitlab.qarea.org/tgms/planningms/cfg"
 )
 
 func New() *sqlx.DB {
