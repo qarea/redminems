@@ -1,6 +1,6 @@
 #!/bin/bash
 # Default setup for Narada staging with mysql.
-# Use by symlinkingln -s ../../staging-mysql.setup staging.setup to testdata dir
+# Use by symlinking ln -s ../../staging-mysql.setup staging.setup to testdata dir in test package
 
 
 source "$1/../staging.setup"
