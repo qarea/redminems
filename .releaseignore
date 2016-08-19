@@ -12,8 +12,11 @@ deploy
 deploy_server
 deploy_staging
 deploy_production
+deploy_prod
 migrate
 t/build/.*
+staging-mysql.setup
+staging-mysql.teardown
 (.*/)?staging.setup
 (.*/)?staging.teardown
 
