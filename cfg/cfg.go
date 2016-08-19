@@ -38,12 +38,12 @@ func load() error {
 
 	HTTP.Listen = narada.GetConfigLine("http/listen")
 	if strings.Index(HTTP.Listen, ":") == -1 {
-		log.Fatal("please setup config/listen")
+		log.Fatal("please setup config/http/listen")
 	}
 
 	HTTP.BasePath = narada.GetConfigLine("http/basepath")
 	if HTTP.BasePath != "" && (HTTP.BasePath[0] != '/' || HTTP.BasePath[len(HTTP.BasePath)-1] == '/') {
-		log.Fatal("config/basepath should begin with / and should not end with /")
+		log.Fatal("config/http/basepath should begin with / and should not end with /")
 	}
 
 	HTTP.RealIPHeader = narada.GetConfigLine("real_ip_header")
