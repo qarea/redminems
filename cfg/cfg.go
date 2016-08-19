@@ -13,7 +13,14 @@ var (
 	Debug        bool
 	LockTimeout  time.Duration
 	RSAPublicKey []byte
-	HTTP         struct {
+	MySQL        struct {
+		Host     string
+		Port     int
+		DB       string
+		Login    string
+		Password string
+	}
+	HTTP struct {
 		Listen       string
 		BasePath     string
 		RealIPHeader string
@@ -40,6 +47,12 @@ func load() error {
 	}
 
 	HTTP.RealIPHeader = narada.GetConfigLine("real_ip_header")
+
+	MySQL.Host = narada.GetConfigLine("mysql/host")
+	MySQL.Port = narada.GetConfigInt("mysql/port")
+	MySQL.DB = narada.GetConfigLine("mysql/db")
+	MySQL.Login = narada.GetConfigLine("mysql/login")
+	MySQL.Password = narada.GetConfigLine("mysql/pass")
 
 	var err error
 	RSAPublicKey, err = narada.GetConfig("rsa_public_key")
