@@ -17,7 +17,9 @@ import (
 var log = narada.NewLog("")
 
 func main() {
-	bootstrap.Unlock()
+	if err := bootstrap.Unlock(); err != nil {
+		log.Fatal(err)
+	}
 	log.NOTICE("Listening on %s", cfg.HTTP.Listen+cfg.HTTP.BasePath)
 	log.Fatal(http.ListenAndServe(cfg.HTTP.Listen+cfg.HTTP.BasePath, nil))
 }
