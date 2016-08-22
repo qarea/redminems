@@ -46,7 +46,7 @@ func load() error {
 		log.Fatal("config/http/basepath should begin with / and should not end with /")
 	}
 
-	HTTP.RealIPHeader = narada.GetConfigLine("real_ip_header")
+	HTTP.RealIPHeader = narada.GetConfigLine("http/real_ip_header")
 
 	MySQL.Host = narada.GetConfigLine("mysql/host")
 	MySQL.Port = narada.GetConfigInt("mysql/port")
