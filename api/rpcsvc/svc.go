@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"net/rpc"
 
+	"github.com/powerman/narada-go/narada"
+
 	"../../cfg"
 
-	"github.com/powerman/narada-go/narada"
 	"github.com/powerman/rpc-codec/jsonrpc2"
 )
 

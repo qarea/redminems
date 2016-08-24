@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"../../cfg"
-
 	"github.com/powerman/narada-go/narada"
+
+	"../../cfg"
 )
 
 var log = narada.NewLog("")
