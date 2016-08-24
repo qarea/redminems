@@ -21,5 +21,5 @@ func main() {
 		log.Fatal(err)
 	}
 	log.NOTICE("Listening on %s", cfg.HTTP.Listen+cfg.HTTP.BasePath)
-	log.Fatal(http.ListenAndServe(cfg.HTTP.Listen+cfg.HTTP.BasePath, nil))
+	log.Fatal(http.ListenAndServe(cfg.HTTP.Listen, nil))
 }

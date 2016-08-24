@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/rpc"
 
+	"../../cfg"
+
 	"github.com/powerman/narada-go/narada"
 	"github.com/powerman/rpc-codec/jsonrpc2"
 )
@@ -12,7 +14,7 @@ import (
 var log = narada.NewLog("rpcsvc: ")
 
 func init() {
-	http.Handle("/rpc", jsonrpc2.HTTPHandler(nil))
+	http.Handle(cfg.HTTP.BasePath+"/rpc", jsonrpc2.HTTPHandler(nil))
 	if err := rpc.Register(&API{}); err != nil {
 		log.Fatal(err)
 	}
