@@ -5,6 +5,8 @@ import (
 
 	"../cfg"
 	"github.com/jmoiron/sqlx"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //New creates new database connection for mysql database
