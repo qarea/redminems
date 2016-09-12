@@ -21,8 +21,10 @@ var (
 		Password string
 	}
 	HTTP struct {
-		Listen       string
-		BasePath     string
+		Listen   string
+		BasePath string
+		//Default timeout for http requests to adapters
+		Timeout      time.Duration
 		RealIPHeader string
 	}
 )
@@ -47,12 +49,7 @@ func load() error {
 	}
 
 	HTTP.RealIPHeader = narada.GetConfigLine("http/real_ip_header")
-
-	MySQL.Host = narada.GetConfigLine("mysql/host")
-	MySQL.Port = narada.GetConfigInt("mysql/port")
-	MySQL.DB = narada.GetConfigLine("mysql/db")
-	MySQL.Login = narada.GetConfigLine("mysql/login")
-	MySQL.Password = narada.GetConfigLine("mysql/pass")
+	HTTP.Timeout = narada.GetConfigDuration("http/timeout")
 
 	var err error
 	RSAPublicKey, err = narada.GetConfig("rsa_public_key")

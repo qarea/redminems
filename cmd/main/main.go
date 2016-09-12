@@ -3,21 +3,30 @@ package main
 
 import (
 	"github.com/powerman/narada-go/narada/bootstrap"
+	"gitlab.qarea.org/tgms/ctxtg"
+	"gitlab.qarea.org/tgms/redminems/api/rpcsvc"
 
 	"net/http"
 
 	"github.com/powerman/narada-go/narada"
 	"github.com/prometheus/client_golang/prometheus"
 
-	_ "../../api/eventsvc"
 	_ "../../api/rpcsvc"
-	_ "../../api/websvc"
 	"../../cfg"
 )
 
 var log = narada.NewLog("")
 
 func main() {
+	p, err := ctxtg.NewRSATokenParser(cfg.RSAPublicKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Implement your own trackerClient and pass it instead of "nil" to rpcsvc.Init
+	// trackerClient = NewTrackerClient()
+	rpcsvc.Init(nil, p)
+
 	if err := bootstrap.Unlock(); err != nil {
 		log.Fatal(err)
 	}

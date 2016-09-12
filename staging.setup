@@ -11,5 +11,6 @@ ln -s "$1/../../bin"
 mkdir -p config/http
 
 echo 127.0.0.1:0                        > config/http/listen
+echo 10s                                > config/http/timeout
 echo 1s                                 > config/lock_timeout
 echo 1                                  > config/rsa_public_key
