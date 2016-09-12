@@ -66,17 +66,6 @@ func (*API) Version(args *struct{}, res *string) error {
 	return nil
 }
 
-type ProjectsReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	entities.Pagination
-}
-
-type ProjectsResp struct {
-	Projects []entities.Project
-	Amount   int64
-}
-
 func (r *API) GetProjects(req *ProjectsReq, resp *ProjectsResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		projects, amount, err := r.tracker.Projects(ctx, req.Tracker, req.Pagination)
@@ -87,16 +76,6 @@ func (r *API) GetProjects(req *ProjectsReq, resp *ProjectsResp) error {
 		return err
 	})
 	return errWithLog(req.Context, "fail to GetProjects", err)
-}
-
-type ProjectDetailsReq struct {
-	Context   ctxtg.Context
-	Tracker   entities.Tracker
-	ProjectID entities.ProjectID
-}
-
-type ProjectDetailsResp struct {
-	Project entities.Project
 }
 
 func (r *API) GetProjectDetails(req *ProjectDetailsReq, resp *ProjectDetailsResp) error {
@@ -112,15 +91,6 @@ func (r *API) GetProjectDetails(req *ProjectDetailsReq, resp *ProjectDetailsResp
 	return errWithLog(req.Context, "fail to GetProjectDetails", err)
 }
 
-type CurrentUserReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-}
-
-type CurrentUserResp struct {
-	User entities.User
-}
-
 func (r *API) GetCurrentUser(req *CurrentUserReq, resp *CurrentUserResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		u, err := r.tracker.UserInfo(ctx, req.Tracker)
@@ -133,19 +103,6 @@ func (r *API) GetCurrentUser(req *CurrentUserReq, resp *CurrentUserResp) error {
 	})
 	return errWithLog(req.Context, "current user info err", err)
 }
-
-type ProjectIssuesReq struct {
-	Context   ctxtg.Context
-	Tracker   entities.Tracker
-	ProjectID entities.ProjectID
-	entities.Pagination
-}
-
-type ProjectIssuesResp struct {
-	Issues []entities.Issue
-	Amount int64
-}
-
 func (r *API) GetProjectIssues(req *ProjectIssuesReq, resp *ProjectIssuesResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		is, amount, err := r.tracker.ProjectIssues(ctx, req.Tracker, req.ProjectID, req.Pagination)
@@ -157,18 +114,6 @@ func (r *API) GetProjectIssues(req *ProjectIssuesReq, resp *ProjectIssuesResp) e
 	})
 	return errWithLog(req.Context, "issues err", err)
 }
-
-type CreateIssueReq struct {
-	Context   ctxtg.Context
-	Tracker   entities.Tracker
-	Issue     entities.NewIssue
-	ProjectID entities.ProjectID
-}
-
-type CreateIssueResp struct {
-	Issue entities.Issue
-}
-
 func (r *API) CreateIssue(req *CreateIssueReq, resp *CreateIssueResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.CreateIssue(ctx, req.Tracker, req.Issue, req.ProjectID)
@@ -181,17 +126,6 @@ func (r *API) CreateIssue(req *CreateIssueReq, resp *CreateIssueResp) error {
 	})
 	return errWithLog(req.Context, "create issue err", err)
 }
-
-type GetIssueReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	IssueID entities.IssueID
-}
-
-type GetIssueResp struct {
-	Issue entities.Issue
-}
-
 func (r *API) GetIssue(req *GetIssueReq, resp *GetIssueResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.Issue(ctx, req.Tracker, req.IssueID)
@@ -204,44 +138,18 @@ func (r *API) GetIssue(req *GetIssueReq, resp *GetIssueResp) error {
 	})
 	return errWithLog(req.Context, "issue by ID err", err)
 }
-
-type UpdateIssueProgressReq struct {
-	Context  ctxtg.Context
-	Tracker  entities.Tracker
-	IssueID  entities.IssueID
-	Progress entities.Progress
-}
-
 func (r *API) UpdateIssueProgress(req *UpdateIssueProgressReq, _ *struct{}) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		return r.tracker.UpdateIssueProgress(ctx, req.Tracker, req.IssueID, req.Progress)
 	})
 	return errWithLog(req.Context, "update issue err", err)
 }
-
-type CreateReportReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	Report  entities.Report
-}
-
 func (r *API) CreateReport(req *CreateReportReq, _ *struct{}) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		return r.tracker.CreateReport(ctx, req.Tracker, req.Report)
 	})
 	return errWithLog(req.Context, "create report err", err)
 }
-
-type GetReportsReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	Date    int64
-}
-
-type GetReportsResp struct {
-	Total int64
-}
-
 func (r *API) GetTotalReports(req *GetReportsReq, resp *GetReportsResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		time, err := r.tracker.TotalReports(ctx, req.Tracker, req.Date)
@@ -251,17 +159,6 @@ func (r *API) GetTotalReports(req *GetReportsReq, resp *GetReportsResp) error {
 		return err
 	})
 	return errWithLog(req.Context, "total reports err", err)
-}
-
-type GetIssueByURLReq struct {
-	Context  ctxtg.Context
-	Tracker  entities.Tracker
-	IssueURL entities.IssueURL
-}
-
-type GetIssueByURLResp struct {
-	Issue     entities.Issue
-	ProjectID entities.ProjectID
 }
 
 func (r *API) GetIssueByURL(req *GetIssueByURLReq, resp *GetIssueByURLResp) error {
