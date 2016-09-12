@@ -5,7 +5,7 @@ This project based on https://github.com/powerman/narada-base/tree/go-socklog an
 
 == Additions/changes to base projects
 
-=== ./migrate
+=== migrate
 
 .Add configuration files:
 
