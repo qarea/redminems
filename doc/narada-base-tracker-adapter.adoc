@@ -1,5 +1,4 @@
-Narada tracker adapter base
-================
+= Narada tracker adapter base
 
 This project based on https://gitlab.qarea.org/tgms/narada-tgms-base/tree/master
 
