@@ -31,7 +31,7 @@ main() {
 			release_project
 			release_migrate
 			git add ".release/${version}".*         || die 'Failed'
-			git commit -m "Release $version"        || die 'Failed'
+            git commit -m "Release $version [ci-skip]"        || die 'Failed'
 		fi
 		git tag -a -m release "$version"                || die 'Failed'
 		if git branch -vv | grep -q '^\* \S\+\s\+\S\+ \[origin/'; then
