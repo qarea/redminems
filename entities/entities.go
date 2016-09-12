@@ -1,12 +1,5 @@
 package entities
 
-import (
-	"regexp"
-	"strconv"
-
-	"github.com/pkg/errors"
-)
-
 type Project struct {
 	ID            ProjectID
 	Title         string
@@ -76,19 +69,4 @@ type Pagination struct {
 type ProjectID int64
 type IssueID int64
 type Progress int
-
 type IssueURL string
-
-var issueIDRegexp = regexp.MustCompile(`/issues/([0-9]+)`)
-
-func (u IssueURL) IssueID() (IssueID, error) {
-	strID := issueIDRegexp.FindStringSubmatch(string(u))
-	if strID == nil {
-		return 0, errors.Wrapf(ErrIssueURL, "invalid issue URL %s", u)
-	}
-	id, err := strconv.ParseInt(strID[1], 10, 0)
-	if err != nil {
-		return 0, errors.Wrapf(ErrIssueURL, "failed to parse id from URL %s", u)
-	}
-	return IssueID(id), nil
-}
