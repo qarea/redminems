@@ -54,7 +54,8 @@ type User struct {
 }
 
 type Report struct {
-	IssueID    int64
+	IssueID    IssueID
+	ProjectID  ProjectID
 	ActivityID int64
 	Comments   string
 	Duration   int64 //In seconds

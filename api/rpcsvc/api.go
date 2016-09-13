@@ -59,9 +59,10 @@ type CreateIssueResp struct {
 }
 
 type GetIssueReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	IssueID entities.IssueID
+	Context   ctxtg.Context
+	Tracker   entities.Tracker
+	IssueID   entities.IssueID
+	ProjectID entities.ProjectID
 }
 
 type GetIssueResp struct {
@@ -86,10 +87,11 @@ type GetIssueByURLResp struct {
 }
 
 type UpdateIssueProgressReq struct {
-	Context  ctxtg.Context
-	Tracker  entities.Tracker
-	IssueID  entities.IssueID
-	Progress entities.Progress
+	Context   ctxtg.Context
+	Tracker   entities.Tracker
+	IssueID   entities.IssueID
+	ProjectID entities.ProjectID
+	Progress  entities.Progress
 }
 
 type GetReportsReq struct {

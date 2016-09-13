@@ -394,11 +394,12 @@ func TestCreateIssue(t *testing.T) {
 
 func TestGetIssue(t *testing.T) {
 	type test struct {
-		issue    *entities.Issue
-		issueID  entities.IssueID
-		err      error
-		token    ctxtg.Token
-		tokenErr error
+		issue     *entities.Issue
+		issueID   entities.IssueID
+		projectID entities.ProjectID
+		err       error
+		token     ctxtg.Token
+		tokenErr  error
 	}
 	tests := map[string]test{
 		"Token parse error": {
@@ -419,9 +420,12 @@ func TestGetIssue(t *testing.T) {
 
 	for label, test := range tests {
 		rc := TestRedmineClient{
-			issue: func(ctx context.Context, tr entities.Tracker, id entities.IssueID) (*entities.Issue, error) {
+			issue: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, id entities.IssueID) (*entities.Issue, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
+				}
+				if test.projectID != pid {
+					t.Error("Invalid project ID")
 				}
 				checkCtx(t, label, ctx)
 				checkTracker(t, label, tr)
@@ -440,9 +444,10 @@ func TestGetIssue(t *testing.T) {
 
 		var resp GetIssueResp
 		err := r.GetIssue(&GetIssueReq{
-			Context: testContext(test.token),
-			Tracker: testTracker,
-			IssueID: test.issueID,
+			Context:   testContext(test.token),
+			Tracker:   testTracker,
+			IssueID:   test.issueID,
+			ProjectID: test.projectID,
 		}, &resp)
 
 		if err := p.Error(); err != nil {
@@ -528,7 +533,7 @@ func TestUpdateIssue(t *testing.T) {
 	type test struct {
 		progress      entities.Progress
 		issueToReturn *entities.Issue
-		projectID     int64
+		projectID     entities.ProjectID
 		err           error
 		token         ctxtg.Token
 		tokenErr      error
@@ -554,9 +559,12 @@ func TestUpdateIssue(t *testing.T) {
 
 	for label, test := range tests {
 		rc := TestRedmineClient{
-			updateIssueProgress: func(ctx context.Context, tr entities.Tracker, iid entities.IssueID, pr entities.Progress) error {
+			updateIssueProgress: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, iid entities.IssueID, pr entities.Progress) error {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
+				}
+				if pid != test.projectID {
+					t.Error("Invalid projectID")
 				}
 				checkCtx(t, label, ctx)
 				checkTracker(t, label, tr)
@@ -574,9 +582,10 @@ func TestUpdateIssue(t *testing.T) {
 		r := newAPI(rc, p)
 
 		err := r.UpdateIssueProgress(&UpdateIssueProgressReq{
-			Context:  testContext(test.token),
-			Tracker:  testTracker,
-			Progress: test.progress,
+			Context:   testContext(test.token),
+			Tracker:   testTracker,
+			Progress:  test.progress,
+			ProjectID: test.projectID,
 		}, nil)
 
 		if err := p.Error(); err != nil {
@@ -598,7 +607,12 @@ func TestCreateReport(t *testing.T) {
 	tests := map[string]test{
 		"Create report": {
 			report: entities.Report{
-				IssueID: 1,
+				IssueID:    1,
+				ProjectID:  2,
+				ActivityID: 3,
+				Comments:   "comme",
+				Duration:   4,
+				Started:    5,
 			},
 		},
 		"Token parse error": {
@@ -740,10 +754,10 @@ type TestRedmineClient struct {
 	project             func(context.Context, entities.Tracker, entities.ProjectID) (*entities.Project, error)
 	projectIssues       func(context.Context, entities.Tracker, entities.ProjectID, entities.Pagination) ([]entities.Issue, int64, error)
 	userInfo            func(context.Context, entities.Tracker) (*entities.User, error)
-	issue               func(context.Context, entities.Tracker, entities.IssueID) (*entities.Issue, error)
+	issue               func(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID) (*entities.Issue, error)
 	issueByURL          func(context.Context, entities.Tracker, entities.IssueURL) (*entities.Issue, error)
 	createIssue         func(context.Context, entities.Tracker, entities.NewIssue, entities.ProjectID) (*entities.Issue, error)
-	updateIssueProgress func(context.Context, entities.Tracker, entities.IssueID, entities.Progress) error
+	updateIssueProgress func(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID, entities.Progress) error
 	totalReports        func(ctx context.Context, t entities.Tracker, date int64) (int64, error)
 	createReport        func(context.Context, entities.Tracker, entities.Report) error
 }
@@ -764,8 +778,8 @@ func (r TestRedmineClient) UserInfo(ctx context.Context, t entities.Tracker) (*e
 	return r.userInfo(ctx, t)
 }
 
-func (r TestRedmineClient) Issue(ctx context.Context, t entities.Tracker, id entities.IssueID) (*entities.Issue, error) {
-	return r.issue(ctx, t, id)
+func (r TestRedmineClient) Issue(ctx context.Context, t entities.Tracker, pid entities.ProjectID, id entities.IssueID) (*entities.Issue, error) {
+	return r.issue(ctx, t, pid, id)
 }
 
 func (r TestRedmineClient) IssueByURL(ctx context.Context, t entities.Tracker, url entities.IssueURL) (*entities.Issue, error) {
@@ -776,8 +790,8 @@ func (r TestRedmineClient) CreateIssue(ctx context.Context, t entities.Tracker, 
 	return r.createIssue(ctx, t, i, projectID)
 }
 
-func (r TestRedmineClient) UpdateIssueProgress(ctx context.Context, t entities.Tracker, iid entities.IssueID, pr entities.Progress) error {
-	return r.updateIssueProgress(ctx, t, iid, pr)
+func (r TestRedmineClient) UpdateIssueProgress(ctx context.Context, t entities.Tracker, pid entities.ProjectID, iid entities.IssueID, pr entities.Progress) error {
+	return r.updateIssueProgress(ctx, t, pid, iid, pr)
 }
 
 func (r TestRedmineClient) TotalReports(ctx context.Context, t entities.Tracker, date int64) (int64, error) {
