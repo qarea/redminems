@@ -599,16 +599,17 @@ func TestUpdateIssue(t *testing.T) {
 
 func TestCreateReport(t *testing.T) {
 	type test struct {
-		report   entities.Report
-		err      error
-		token    ctxtg.Token
-		tokenErr error
+		report    entities.Report
+		projectID entities.ProjectID
+		err       error
+		token     ctxtg.Token
+		tokenErr  error
 	}
 	tests := map[string]test{
 		"Create report": {
+			projectID: 2,
 			report: entities.Report{
 				IssueID:    1,
-				ProjectID:  2,
 				ActivityID: 3,
 				Comments:   "comme",
 				Duration:   4,
@@ -626,9 +627,12 @@ func TestCreateReport(t *testing.T) {
 
 	for label, test := range tests {
 		rc := TestRedmineClient{
-			createReport: func(ctx context.Context, tr entities.Tracker, rep entities.Report) error {
+			createReport: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
+				}
+				if test.projectID != pid {
+					t.Error("Invalid projectID")
 				}
 				checkCtx(t, label, ctx)
 				checkTracker(t, label, tr)
@@ -646,9 +650,10 @@ func TestCreateReport(t *testing.T) {
 		r := newAPI(rc, p)
 
 		err := r.CreateReport(&CreateReportReq{
-			Context: testContext(test.token),
-			Tracker: testTracker,
-			Report:  test.report,
+			Context:   testContext(test.token),
+			Tracker:   testTracker,
+			ProjectID: test.projectID,
+			Report:    test.report,
 		}, &struct{}{})
 
 		if err := p.Error(); err != nil {
@@ -759,7 +764,7 @@ type TestRedmineClient struct {
 	createIssue         func(context.Context, entities.Tracker, entities.NewIssue, entities.ProjectID) (*entities.Issue, error)
 	updateIssueProgress func(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID, entities.Progress) error
 	totalReports        func(ctx context.Context, t entities.Tracker, date int64) (int64, error)
-	createReport        func(context.Context, entities.Tracker, entities.Report) error
+	createReport        func(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error
 }
 
 func (r TestRedmineClient) Projects(ctx context.Context, t entities.Tracker, p entities.Pagination) ([]entities.Project, int64, error) {
@@ -798,6 +803,6 @@ func (r TestRedmineClient) TotalReports(ctx context.Context, t entities.Tracker,
 	return r.totalReports(ctx, t, date)
 }
 
-func (r TestRedmineClient) CreateReport(ctx context.Context, t entities.Tracker, rep entities.Report) error {
-	return r.createReport(ctx, t, rep)
+func (r TestRedmineClient) CreateReport(ctx context.Context, t entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
+	return r.createReport(ctx, t, pid, rep)
 }

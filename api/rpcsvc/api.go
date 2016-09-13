@@ -70,9 +70,10 @@ type GetIssueResp struct {
 }
 
 type CreateReportReq struct {
-	Context ctxtg.Context
-	Tracker entities.Tracker
-	Report  entities.Report
+	Context   ctxtg.Context
+	Tracker   entities.Tracker
+	ProjectID entities.ProjectID
+	Report    entities.Report
 }
 
 type GetIssueByURLReq struct {

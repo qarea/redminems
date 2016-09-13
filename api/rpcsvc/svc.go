@@ -39,7 +39,7 @@ type TrackerClient interface {
 	UpdateIssueProgress(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID, entities.Progress) error
 	//TotalReports receive date as UNIX timestamp (seconds) and return total reported time at this day in seconds
 	TotalReports(ctx context.Context, t entities.Tracker, date int64) (int64, error)
-	CreateReport(context.Context, entities.Tracker, entities.Report) error
+	CreateReport(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error
 }
 
 func Init(r TrackerClient, p ctxtg.TokenParser) {
@@ -114,6 +114,7 @@ func (r *API) GetProjectIssues(req *ProjectIssuesReq, resp *ProjectIssuesResp) e
 	})
 	return errWithLog(req.Context, "issues err", err)
 }
+
 func (r *API) CreateIssue(req *CreateIssueReq, resp *CreateIssueResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.CreateIssue(ctx, req.Tracker, req.Issue, req.ProjectID)
@@ -146,7 +147,7 @@ func (r *API) UpdateIssueProgress(req *UpdateIssueProgressReq, _ *struct{}) erro
 }
 func (r *API) CreateReport(req *CreateReportReq, _ *struct{}) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
-		return r.tracker.CreateReport(ctx, req.Tracker, req.Report)
+		return r.tracker.CreateReport(ctx, req.Tracker, req.ProjectID, req.Report)
 	})
 	return errWithLog(req.Context, "create report err", err)
 }
