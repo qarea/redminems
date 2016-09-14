@@ -15,42 +15,42 @@ func NewClient() *Client {
 type Client struct{}
 
 //Project return project by id or err if not foind project
-func (c *Client) Project(context.Context, entities.Tracker, entities.ProjectID) (*entities.Project, error) {
+func (c *Client) Project(ctx context.Context, tr entities.Tracker, pid entities.ProjectID) (*entities.Project, error) {
 	panic("not implemented")
 }
 
 //Projects return project list and total amount of projects
-func (c *Client) Projects(context.Context, entities.Tracker, entities.Pagination) ([]entities.Project, int64, error) {
+func (c *Client) Projects(ctx context.Context, tr entities.Tracker, p entities.Pagination) ([]entities.Project, int64, error) {
 	panic("not implemented")
 }
 
 //ProjectIssues return issues assigned to user and total amount
-func (c *Client) ProjectIssues(context.Context, entities.Tracker, entities.ProjectID, entities.Pagination) ([]entities.Issue, int64, error) {
+func (c *Client) ProjectIssues(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, p entities.Pagination) ([]entities.Issue, int64, error) {
 	panic("not implemented")
 }
 
 //UserInfo returns user info from tracker t
-func (c *Client) UserInfo(context.Context, entities.Tracker) (*entities.User, error) {
+func (c *Client) UserInfo(ctx context.Context, tr entities.Tracker) (*entities.User, error) {
 	panic("not implemented")
 }
 
 //Issue query issue by ID from tracker t or err if not found
-func (c *Client) Issue(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID) (*entities.Issue, error) {
+func (c *Client) Issue(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, iid entities.IssueID) (*entities.Issue, error) {
 	panic("not implemented")
 }
 
 //IssueByURL query issue by URL ar err if not found
-func (c *Client) IssueByURL(context.Context, entities.Tracker, entities.IssueURL) (*entities.Issue, error) {
+func (c *Client) IssueByURL(ctx context.Context, tr entities.Tracker, url entities.IssueURL) (*entities.Issue, error) {
 	panic("not implemented")
 }
 
 //CreateIssue for projectID and assign it to user
-func (c *Client) CreateIssue(context.Context, entities.Tracker, entities.NewIssue, entities.ProjectID) (*entities.Issue, error) {
+func (c *Client) CreateIssue(ctx context.Context, tr entities.Tracker, issue entities.NewIssue, pid entities.ProjectID) (*entities.Issue, error) {
 	panic("not implemented")
 }
 
 //UpdateIssueProgress updates issue progress by issue id
-func (c *Client) UpdateIssueProgress(context.Context, entities.Tracker, entities.ProjectID, entities.IssueID, entities.Progress) error {
+func (c *Client) UpdateIssueProgress(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, is entities.IssueID, pr entities.Progress) error {
 	panic("not implemented")
 }
 
@@ -60,6 +60,6 @@ func (c *Client) TotalReports(ctx context.Context, t entities.Tracker, date int6
 }
 
 //CreateReport for user
-func (c *Client) CreateReport(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error {
+func (c *Client) CreateReport(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
 	panic("not implemented")
 }
