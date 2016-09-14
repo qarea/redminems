@@ -4,15 +4,15 @@ package main
 import (
 	"github.com/powerman/narada-go/narada/bootstrap"
 	"gitlab.qarea.org/tgms/ctxtg"
-	"gitlab.qarea.org/tgms/redminems/api/rpcsvc"
 
 	"net/http"
 
 	"github.com/powerman/narada-go/narada"
 	"github.com/prometheus/client_golang/prometheus"
 
-	_ "../../api/rpcsvc"
+	"../../api/rpcsvc"
 	"../../cfg"
+	"../../tracker"
 )
 
 var log = narada.NewLog("")
@@ -23,9 +23,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Implement your own trackerClient and pass it instead of "nil" to rpcsvc.Init
-	// trackerClient = NewTrackerClient()
-	rpcsvc.Init(nil, p)
+	tr := tracker.NewClient()
+	rpcsvc.Init(tr, p)
 
 	if err := bootstrap.Unlock(); err != nil {
 		log.Fatal(err)
