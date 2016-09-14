@@ -3,8 +3,12 @@ package tracker
 import (
 	"context"
 
+	"github.com/powerman/narada-go/narada"
+
 	"../entities"
 )
+
+var log = narada.NewLog("tracker client: ")
 
 //NewClient returns new instance of tracker client
 func NewClient() *Client {
