@@ -19,13 +19,6 @@ import (
 
 var log = narada.NewLog("rpcsvc: ")
 
-func init() {
-	http.Handle(cfg.HTTP.BasePath+"/rpc", jsonrpc2.HTTPHandler(nil))
-	if err := rpc.Register(&API{}); err != nil {
-		log.Fatal(err)
-	}
-}
-
 type TrackerClient interface {
 	Project(context.Context, entities.Tracker, entities.ProjectID) (*entities.Project, error)
 	//Projects return project list and total amount of projects

@@ -55,7 +55,7 @@ func TestProjectDetails(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			project: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID) (*entities.Project, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -137,7 +137,7 @@ func TestGetProjects(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			projects: func(ctx context.Context, tr entities.Tracker, p entities.Pagination) ([]entities.Project, int64, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -202,7 +202,7 @@ func TestGetCurrentUser(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			userInfo: func(ctx context.Context, tr entities.Tracker) (*entities.User, error) {
 				if test.tokenErr != nil {
 					t.Errorf("Should not be called %v", label)
@@ -271,7 +271,7 @@ func TestGetProjectIssues(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			projectIssues: func(ctx context.Context, tr entities.Tracker, id entities.ProjectID, p entities.Pagination) ([]entities.Issue, int64, error) {
 				if test.tokenErr != nil {
 					t.Errorf("Should not be called %v", label)
@@ -349,7 +349,7 @@ func TestCreateIssue(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			createIssue: func(ctx context.Context, tr entities.Tracker, is entities.NewIssue, id entities.ProjectID) (*entities.Issue, error) {
 				if test.tokenErr != nil {
 					t.Errorf("Should not be called %v", label)
@@ -419,7 +419,7 @@ func TestGetIssue(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			issue: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, id entities.IssueID) (*entities.Issue, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -489,7 +489,7 @@ func TestGetIssueByURL(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			issueByURL: func(ctx context.Context, tr entities.Tracker, url entities.IssueURL) (*entities.Issue, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -558,7 +558,7 @@ func TestUpdateIssue(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			updateIssueProgress: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, iid entities.IssueID, pr entities.Progress) error {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -626,7 +626,7 @@ func TestCreateReport(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			createReport: func(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -688,7 +688,7 @@ func TestGetTotalReports(t *testing.T) {
 	}
 
 	for label, test := range tests {
-		rc := TestRedmineClient{
+		rc := TestTrackerClient{
 			totalReports: func(ctx context.Context, tr entities.Tracker, date int64) (int64, error) {
 				if test.tokenErr != nil {
 					t.Error("Should not be called", label)
@@ -754,7 +754,7 @@ func testContext(token ctxtg.Token) ctxtg.Context {
 	}
 }
 
-type TestRedmineClient struct {
+type TestTrackerClient struct {
 	projects            func(context.Context, entities.Tracker, entities.Pagination) ([]entities.Project, int64, error)
 	project             func(context.Context, entities.Tracker, entities.ProjectID) (*entities.Project, error)
 	projectIssues       func(context.Context, entities.Tracker, entities.ProjectID, entities.Pagination) ([]entities.Issue, int64, error)
@@ -767,42 +767,42 @@ type TestRedmineClient struct {
 	createReport        func(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error
 }
 
-func (r TestRedmineClient) Projects(ctx context.Context, t entities.Tracker, p entities.Pagination) ([]entities.Project, int64, error) {
+func (r TestTrackerClient) Projects(ctx context.Context, t entities.Tracker, p entities.Pagination) ([]entities.Project, int64, error) {
 	return r.projects(ctx, t, p)
 }
 
-func (r TestRedmineClient) Project(ctx context.Context, t entities.Tracker, pid entities.ProjectID) (*entities.Project, error) {
+func (r TestTrackerClient) Project(ctx context.Context, t entities.Tracker, pid entities.ProjectID) (*entities.Project, error) {
 	return r.project(ctx, t, pid)
 }
 
-func (r TestRedmineClient) ProjectIssues(ctx context.Context, t entities.Tracker, id entities.ProjectID, p entities.Pagination) ([]entities.Issue, int64, error) {
+func (r TestTrackerClient) ProjectIssues(ctx context.Context, t entities.Tracker, id entities.ProjectID, p entities.Pagination) ([]entities.Issue, int64, error) {
 	return r.projectIssues(ctx, t, id, p)
 }
 
-func (r TestRedmineClient) UserInfo(ctx context.Context, t entities.Tracker) (*entities.User, error) {
+func (r TestTrackerClient) UserInfo(ctx context.Context, t entities.Tracker) (*entities.User, error) {
 	return r.userInfo(ctx, t)
 }
 
-func (r TestRedmineClient) Issue(ctx context.Context, t entities.Tracker, pid entities.ProjectID, id entities.IssueID) (*entities.Issue, error) {
+func (r TestTrackerClient) Issue(ctx context.Context, t entities.Tracker, pid entities.ProjectID, id entities.IssueID) (*entities.Issue, error) {
 	return r.issue(ctx, t, pid, id)
 }
 
-func (r TestRedmineClient) IssueByURL(ctx context.Context, t entities.Tracker, url entities.IssueURL) (*entities.Issue, error) {
+func (r TestTrackerClient) IssueByURL(ctx context.Context, t entities.Tracker, url entities.IssueURL) (*entities.Issue, error) {
 	return r.issueByURL(ctx, t, url)
 }
 
-func (r TestRedmineClient) CreateIssue(ctx context.Context, t entities.Tracker, i entities.NewIssue, projectID entities.ProjectID) (*entities.Issue, error) {
+func (r TestTrackerClient) CreateIssue(ctx context.Context, t entities.Tracker, i entities.NewIssue, projectID entities.ProjectID) (*entities.Issue, error) {
 	return r.createIssue(ctx, t, i, projectID)
 }
 
-func (r TestRedmineClient) UpdateIssueProgress(ctx context.Context, t entities.Tracker, pid entities.ProjectID, iid entities.IssueID, pr entities.Progress) error {
+func (r TestTrackerClient) UpdateIssueProgress(ctx context.Context, t entities.Tracker, pid entities.ProjectID, iid entities.IssueID, pr entities.Progress) error {
 	return r.updateIssueProgress(ctx, t, pid, iid, pr)
 }
 
-func (r TestRedmineClient) TotalReports(ctx context.Context, t entities.Tracker, date int64) (int64, error) {
+func (r TestTrackerClient) TotalReports(ctx context.Context, t entities.Tracker, date int64) (int64, error) {
 	return r.totalReports(ctx, t, date)
 }
 
-func (r TestRedmineClient) CreateReport(ctx context.Context, t entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
+func (r TestTrackerClient) CreateReport(ctx context.Context, t entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
 	return r.createReport(ctx, t, pid, rep)
 }
