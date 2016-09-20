@@ -2,9 +2,13 @@ package tracker
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"net/http"
 
 	"github.com/powerman/narada-go/narada"
 
+	"../cfg"
 	"../entities"
 )
 
@@ -12,11 +16,18 @@ var log = narada.NewLog("tracker client: ")
 
 //NewClient returns new instance of tracker client
 func NewClient() *Client {
-	return &Client{}
+	return &Client{
+		httpClient: &http.Client{
+			Timeout:       cfg.HTTP.Timeout,
+			CheckRedirect: copyHeadersOnRedirect,
+		},
+	}
 }
 
 //Client to tracker
-type Client struct{}
+type Client struct {
+	httpClient *http.Client
+}
 
 //Project return project by id or err if not foind project
 func (c *Client) Project(ctx context.Context, tr entities.Tracker, pid entities.ProjectID) (*entities.Project, error) {
@@ -66,4 +77,28 @@ func (c *Client) TotalReports(ctx context.Context, t entities.Tracker, date int6
 //CreateReport for user
 func (c *Client) CreateReport(ctx context.Context, tr entities.Tracker, pid entities.ProjectID, rep entities.Report) error {
 	panic("not implemented")
+}
+
+func copyHeadersOnRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return fmt.Errorf("too many redirects")
+	}
+	if len(via) == 0 {
+		return nil
+	}
+	for attr, val := range via[0].Header {
+		if _, ok := req.Header[attr]; !ok {
+			req.Header[attr] = val
+		}
+	}
+	return nil
+}
+
+//Check err of http.Client with this func
+//If true then return entities.ErrTimeout on top
+func isHTTPTimeoutErr(err error) bool {
+	if err, ok := err.(net.Error); ok && err.Timeout() {
+		return true
+	}
+	return false
 }
