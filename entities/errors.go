@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/powerman/rpc-codec/jsonrpc2"
+import (
+	"github.com/powerman/rpc-codec/jsonrpc2"
+	"net/http"
+)
 
 //Global error codes
 var (
@@ -31,5 +34,20 @@ func NewTrackerValidationErr(msg string) error {
 		Code:    trackerValidationErrCode,
 		Message: trackerValidationErrMsg,
 		Data:    msg,
+	}
+}
+
+func ErrorForStatusCode(code int) error {
+	switch code {
+	case http.StatusRequestTimeout:
+		return ErrTimeout
+	case http.StatusForbidden:
+		return ErrForbidden
+	case http.StatusUnauthorized:
+		return ErrCredentials
+	case http.StatusServiceUnavailable:
+		return ErrRemoteServer
+	default:
+		return nil
 	}
 }
