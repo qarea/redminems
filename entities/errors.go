@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"github.com/powerman/rpc-codec/jsonrpc2"
 	"net/http"
+
+	"github.com/powerman/rpc-codec/jsonrpc2"
 )
 
 //Global error codes

@@ -37,10 +37,10 @@ func TestProjectDetails(t *testing.T) {
 	tests := map[string]test{
 		"Return project": {
 			token:     "123412",
-			projectID: 55,
+			projectID: "55",
 			tracker:   testTracker,
 			project: entities.Project{
-				ID:          1,
+				ID:          "1",
 				Title:       "t",
 				Description: "d",
 			},
@@ -108,12 +108,12 @@ func TestGetProjects(t *testing.T) {
 			amount: 20,
 			projects: []entities.Project{
 				{
-					ID:          1,
+					ID:          "1",
 					Title:       "t",
 					Description: "d",
 				},
 				{
-					ID:          1,
+					ID:          "1",
 					Title:       "t2",
 					Description: "d2",
 				},
@@ -251,11 +251,11 @@ func TestGetProjectIssues(t *testing.T) {
 		"Issues": {
 			issues: []entities.Issue{
 				{
-					ID:    1,
+					ID:    "1",
 					Title: "t",
 				},
 				{
-					ID:    2,
+					ID:    "2",
 					Title: "t2",
 				},
 			},
@@ -329,10 +329,10 @@ func TestCreateIssue(t *testing.T) {
 				},
 			},
 			issueToReturn: &entities.Issue{
-				ID:    1,
+				ID:    "1",
 				Title: "issue1",
 			},
-			projectID: 1,
+			projectID: "1",
 		},
 		"Token parse error": {
 			token:    "invalid token",
@@ -410,10 +410,10 @@ func TestGetIssue(t *testing.T) {
 			issue: &entities.Issue{
 				Title: "issue1",
 			},
-			issueID: 1,
+			issueID: "1",
 		},
 		"Error response": {
-			issueID: 2,
+			issueID: "2",
 			err:     entities.ErrForbidden,
 		},
 	}
@@ -474,7 +474,7 @@ func TestGetIssueByURL(t *testing.T) {
 		"Ok issue": {
 			issue: &entities.Issue{
 				Title:     "issue1",
-				ProjectID: 2,
+				ProjectID: "2",
 			},
 			issueURL: "/issue/2",
 		},
@@ -542,10 +542,10 @@ func TestUpdateIssue(t *testing.T) {
 		"Update issue": {
 			progress: 50,
 			issueToReturn: &entities.Issue{
-				ID:    1,
+				ID:    "1",
 				Title: "issue1",
 			},
-			projectID: 1,
+			projectID: "1",
 		},
 		"Token parse error": {
 			token:    "invalid token",
@@ -607,9 +607,9 @@ func TestCreateReport(t *testing.T) {
 	}
 	tests := map[string]test{
 		"Create report": {
-			projectID: 2,
+			projectID: "2",
 			report: entities.Report{
-				IssueID:    1,
+				IssueID:    "1",
 				ActivityID: 3,
 				Comments:   "comme",
 				Duration:   4,

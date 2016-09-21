@@ -48,7 +48,7 @@ type NewIssue struct {
 }
 
 type User struct {
-	ID   int64
+	ID   string
 	Name string
 	Mail string
 }
@@ -66,7 +66,7 @@ type Pagination struct {
 	Limit  int
 }
 
-type ProjectID int64
-type IssueID int64
+type ProjectID string
+type IssueID string
 type Progress int
 type IssueURL string
