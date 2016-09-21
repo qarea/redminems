@@ -3,6 +3,7 @@ package rpcsvc
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"net/rpc"
 
@@ -176,8 +177,18 @@ func errWithLog(ctx ctxtg.Context, prefix string, err error) error {
 	}
 	log.ERR("tracking id: %s, token: %s, %s: %+v", ctx.TracingID, ctx.Token, prefix, err)
 	err = errors.Cause(err)
+	if isHTTPTimeoutErr(err) {
+		return entities.ErrTimeout
+	}
 	if err == context.DeadlineExceeded {
 		return entities.ErrTimeout
 	}
 	return err
+}
+
+func isHTTPTimeoutErr(err error) bool {
+	if err, ok := err.(net.Error); ok && err.Timeout() {
+		return true
+	}
+	return false
 }

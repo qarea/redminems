@@ -3,7 +3,6 @@ package tracker
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/powerman/narada-go/narada"
@@ -92,13 +91,4 @@ func copyHeadersOnRedirect(req *http.Request, via []*http.Request) error {
 		}
 	}
 	return nil
-}
-
-//Check err of http.Client with this func
-//If true then return entities.ErrTimeout on top
-func isHTTPTimeoutErr(err error) bool {
-	if err, ok := err.(net.Error); ok && err.Timeout() {
-		return true
-	}
-	return false
 }
