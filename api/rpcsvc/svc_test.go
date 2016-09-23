@@ -188,7 +188,7 @@ func TestGetCurrentUser(t *testing.T) {
 	tests := map[string]test{
 		"Return user": {
 			user: &entities.User{
-				ID:   1,
+				ID:   "1",
 				Name: "tolya",
 			},
 		},
