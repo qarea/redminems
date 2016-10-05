@@ -10,8 +10,10 @@ import (
 var log = narada.NewLog("")
 
 var (
+	// LockTimeout for narada.SharedLock
+	LockTimeout time.Duration
+
 	Debug        bool
-	LockTimeout  time.Duration
 	RSAPublicKey []byte
 	MySQL        struct {
 		Host     string

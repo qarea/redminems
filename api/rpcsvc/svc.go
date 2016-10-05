@@ -20,6 +20,7 @@ import (
 
 var log = narada.NewLog("rpcsvc: ")
 
+// TrackerClient required interface for new tracker
 type TrackerClient interface {
 	Project(context.Context, entities.Tracker, entities.ProjectID) (*entities.Project, error)
 	//Projects return project list and total amount of projects
@@ -36,6 +37,7 @@ type TrackerClient interface {
 	CreateReport(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error
 }
 
+// Init registers JSON-RPC handlers
 func Init(r TrackerClient, p ctxtg.TokenParser) {
 	if err := rpc.Register(newAPI(r, p)); err != nil {
 		log.Fatal(err)
@@ -50,16 +52,19 @@ func newAPI(r TrackerClient, p ctxtg.TokenParser) *API {
 	}
 }
 
+// API JSON-RPC 2.0 struct
 type API struct {
 	tracker     TrackerClient
 	tokenParser ctxtg.TokenParser
 }
 
+// Version return current service narada version
 func (*API) Version(args *struct{}, res *string) error {
 	*res, _ = narada.Version()
 	return nil
 }
 
+// GetProjects return paginated projects list for user
 func (r *API) GetProjects(req *ProjectsReq, resp *ProjectsResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		projects, amount, err := r.tracker.Projects(ctx, req.Tracker, req.Pagination)
@@ -72,6 +77,7 @@ func (r *API) GetProjects(req *ProjectsReq, resp *ProjectsResp) error {
 	return errWithLog(req.Context, "fail to GetProjects", err)
 }
 
+// GetProjectDetails returns full information by projectID
 func (r *API) GetProjectDetails(req *ProjectDetailsReq, resp *ProjectDetailsResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		project, err := r.tracker.Project(ctx, req.Tracker, req.ProjectID)
@@ -85,6 +91,7 @@ func (r *API) GetProjectDetails(req *ProjectDetailsReq, resp *ProjectDetailsResp
 	return errWithLog(req.Context, "fail to GetProjectDetails", err)
 }
 
+// GetCurrentUser returns current user info
 func (r *API) GetCurrentUser(req *CurrentUserReq, resp *CurrentUserResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		u, err := r.tracker.UserInfo(ctx, req.Tracker)
@@ -97,6 +104,8 @@ func (r *API) GetCurrentUser(req *CurrentUserReq, resp *CurrentUserResp) error {
 	})
 	return errWithLog(req.Context, "current user info err", err)
 }
+
+// GetProjectIssues returns user's issues by project ID
 func (r *API) GetProjectIssues(req *ProjectIssuesReq, resp *ProjectIssuesResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		is, amount, err := r.tracker.ProjectIssues(ctx, req.Tracker, req.ProjectID, req.Pagination)
@@ -109,6 +118,7 @@ func (r *API) GetProjectIssues(req *ProjectIssuesReq, resp *ProjectIssuesResp) e
 	return errWithLog(req.Context, "issues err", err)
 }
 
+// CreateIssue creates issue on tracker
 func (r *API) CreateIssue(req *CreateIssueReq, resp *CreateIssueResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.CreateIssue(ctx, req.Tracker, req.Issue, req.ProjectID)
@@ -121,6 +131,8 @@ func (r *API) CreateIssue(req *CreateIssueReq, resp *CreateIssueResp) error {
 	})
 	return errWithLog(req.Context, "create issue err", err)
 }
+
+// GetIssue returns Issue by ID
 func (r *API) GetIssue(req *GetIssueReq, resp *GetIssueResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.Issue(ctx, req.Tracker, req.ProjectID, req.IssueID)
@@ -133,18 +145,24 @@ func (r *API) GetIssue(req *GetIssueReq, resp *GetIssueResp) error {
 	})
 	return errWithLog(req.Context, "issue by ID err", err)
 }
+
+// UpdateIssueProgress updates issue progress in percents
 func (r *API) UpdateIssueProgress(req *UpdateIssueProgressReq, _ *struct{}) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		return r.tracker.UpdateIssueProgress(ctx, req.Tracker, req.ProjectID, req.IssueID, req.Progress)
 	})
 	return errWithLog(req.Context, "update issue err", err)
 }
+
+// CreateReport reports time on tracker for user ID
 func (r *API) CreateReport(req *CreateReportReq, _ *struct{}) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		return r.tracker.CreateReport(ctx, req.Tracker, req.ProjectID, req.Report)
 	})
 	return errWithLog(req.Context, "create report err", err)
 }
+
+// GetTotalReports receive UNIX timestamp of date and aggregate reported time for user for this day
 func (r *API) GetTotalReports(req *GetReportsReq, resp *GetReportsResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		time, err := r.tracker.TotalReports(ctx, req.Tracker, req.Date)
@@ -156,6 +174,7 @@ func (r *API) GetTotalReports(req *GetReportsReq, resp *GetReportsResp) error {
 	return errWithLog(req.Context, "total reports err", err)
 }
 
+// GetIssueByURL parse incoming URL and return issue and project ID
 func (r *API) GetIssueByURL(req *GetIssueByURLReq, resp *GetIssueByURLResp) error {
 	err := r.tokenParser.ParseCtxWithClaims(req.Context, func(ctx context.Context, c ctxtg.Claims) error {
 		issue, err := r.tracker.IssueByURL(ctx, req.Tracker, req.IssueURL)
@@ -177,10 +196,7 @@ func errWithLog(ctx ctxtg.Context, prefix string, err error) error {
 	}
 	log.ERR("tracking id: %s, token: %s, %s: %+v", ctx.TracingID, ctx.Token, prefix, err)
 	err = errors.Cause(err)
-	if isHTTPTimeoutErr(err) {
-		return entities.ErrTimeout
-	}
-	if err == context.DeadlineExceeded {
+	if err == context.DeadlineExceeded || isHTTPTimeoutErr(err) {
 		return entities.ErrTimeout
 	}
 	return err

@@ -38,6 +38,7 @@ func NewTrackerValidationErr(msg string) error {
 	}
 }
 
+// ErrorForStatusCode convert http.Response status code to our errors
 func ErrorForStatusCode(code int) error {
 	switch code {
 	case http.StatusRequestTimeout:
@@ -47,6 +48,8 @@ func ErrorForStatusCode(code int) error {
 	case http.StatusUnauthorized:
 		return ErrCredentials
 	case http.StatusServiceUnavailable:
+		return ErrRemoteServer
+	case http.StatusInternalServerError:
 		return ErrRemoteServer
 	default:
 		return nil
