@@ -1,0 +1,49 @@
+{
+	"issue": {
+		"id": 71307,
+		"project": {
+			"id": 223,
+			"name": "TimeGuard"
+		},
+		"tracker": {
+			"id": 19,
+			"name": "Task"
+		},
+		"status": {
+			"id": 10,
+			"name": "InProgress"
+		},
+		"priority": {
+			"id": 4,
+			"name": "Normal"
+		},
+		"author": {
+			"id": 1,
+			"name": "Kuharenko, Maks"
+		},
+		"assigned_to": {
+			"id": 1131,
+			"name": "Prylutskyi, Anatolii"
+		},
+		"fixed_version": {
+			"id": 925,
+			"name": "Stand alone timeguard"
+		},
+		"subject": "Develop Redmine Tracker Adapter MS",
+		"description": "https://docs.google.com/document",
+		"start_date": "2016-06-09",
+		"due_date": "2016-06-14",
+		"done_ratio": 10,
+		"estimated_hours": 24.0,
+		"spent_hours": 10.0,
+		"custom_fields": [
+			{
+				"id": 79,
+				"name": "Assessment",
+				"value": "Not Approved"
+			}
+		],
+		"created_on": "2016-06-09T09:10:52Z",
+		"updated_on": "2016-06-10T10:13:28Z"
+	}
+}

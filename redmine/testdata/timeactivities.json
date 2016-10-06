@@ -1,0 +1,28 @@
+{
+	"time_entry_activities": [
+		{
+			"id": 8,
+			"name": "Design"
+		},
+		{
+			"id": 9,
+			"name": "Development"
+		},
+		{
+			"id": 10,
+			"name": "Analysis"
+		},
+		{
+			"id": 11,
+			"name": "Testing"
+		},
+		{
+			"id": 12,
+			"name": "Management"
+		},
+		{
+			"id": 13,
+			"name": "Administration"
+		}
+	]
+}
