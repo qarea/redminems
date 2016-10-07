@@ -2,17 +2,16 @@
 package main
 
 import (
-	"github.com/powerman/narada-go/narada/bootstrap"
-	"gitlab.qarea.org/tgms/ctxtg"
-
-	"net/http"
-
 	"github.com/powerman/narada-go/narada"
+	"github.com/powerman/narada-go/narada/bootstrap"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"../../api/rpcsvc"
-	"../../cfg"
-	"../../tracker"
+	"github.com/qarea/ctxtg"
+	"github.com/qarea/redminems/api/rpcsvc"
+	"github.com/qarea/redminems/cfg"
+	"github.com/qarea/redminems/redmine"
+
+	"net/http"
 )
 
 var log = narada.NewLog("")
@@ -23,8 +22,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tr := tracker.NewClient()
-	rpcsvc.Init(tr, p)
+	r := redmine.NewClient(cfg.HTTP.Timeout)
+
+	rpcsvc.Init(r, p)
 
 	if err := bootstrap.Unlock(); err != nil {
 		log.Fatal(err)

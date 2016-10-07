@@ -1,5 +1,6 @@
 package entities
 
+// Project representation in our system
 type Project struct {
 	ID            ProjectID
 	Title         string
@@ -9,6 +10,7 @@ type Project struct {
 	ActivityTypes []TypeID
 }
 
+// Tracker representation in our system
 type Tracker struct {
 	ID          int64
 	URL         string
@@ -16,16 +18,19 @@ type Tracker struct {
 	Credentials Credentials
 }
 
+// Credentials to tracker
 type Credentials struct {
 	Login    string
 	Password string
 }
 
+// TypeID used for IssueTypes and ActivityTypes
 type TypeID struct {
 	ID   int64
 	Name string
 }
 
+// Issue representation in our system
 type Issue struct {
 	ID          IssueID
 	ProjectID   ProjectID `json:"-"`
@@ -39,6 +44,8 @@ type Issue struct {
 	URL         string
 }
 
+// NewIssue differs from the Issye in a Type field.
+// Type field is int64 type. And Type field inside issue will be empty.
 type NewIssue struct {
 	Issue
 	// Be carefule with NewIssue type
@@ -47,26 +54,36 @@ type NewIssue struct {
 	Type int64
 }
 
+// User information from tracker
 type User struct {
-	ID   string
+	ID   int64
 	Name string
 	Mail string
 }
 
+// Report represents time report and additional information
 type Report struct {
 	IssueID    IssueID
 	ActivityID int64
 	Comments   string
-	Duration   int64 //In seconds
+	Duration   int64
 	Started    int64
 }
 
+// Pagination used for pagination info in corresponding requests
 type Pagination struct {
 	Offset int
 	Limit  int
 }
 
-type ProjectID string
-type IssueID string
+// ProjectID is helper type to avoid invalid int usage
+type ProjectID int64
+
+// IssueID is helper type to avoid invalid int usage
+type IssueID int64
+
+// Progress represents progress in percents (0-100)
 type Progress int
+
+// IssueURL is helper type to avoid invalid string usage
 type IssueURL string

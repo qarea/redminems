@@ -1,0 +1,96 @@
+{
+   "project": {
+      "id": 170,
+      "name": "Internal",
+      "identifier": "internal",
+      "description": "Project170",
+      "created_on": "2012-03-02T16:07:58Z",
+      "updated_on": "2015-05-21T08:58:19Z",
+      "trackers": [
+              {
+                      "id": 1,
+                      "name": "Bug"
+              },
+              {
+                      "id": 2,
+                      "name": "Feature"
+              },
+              {
+                      "id": 3,
+                      "name": "Support"
+              },
+              {
+                      "id": 4,
+                      "name": "Administration"
+              },
+              {
+                      "id": 5,
+                      "name": "Management"
+              },
+              {
+                      "id": 6,
+                      "name": "Quality Control"
+              },
+              {
+                      "id": 7,
+                      "name": "Planning"
+              },
+              {
+                      "id": 8,
+                      "name": "Business analysis"
+              },
+              {
+                      "id": 9,
+                      "name": "Technical writing"
+              },
+              {
+                      "id": 10,
+                      "name": "Design"
+              },
+              {
+                      "id": 11,
+                      "name": "Change Request"
+              },
+              {
+                      "id": 12,
+                      "name": "Interview"
+              },
+              {
+                      "id": 13,
+                      "name": "Estimation"
+              },
+              {
+                      "id": 14,
+                      "name": "Question"
+              },
+              {
+                      "id": 15,
+                      "name": "Vacancy"
+              },
+              {
+                      "id": 16,
+                      "name": "Risk"
+              },
+              {
+                      "id": 17,
+                      "name": "User Story"
+              },
+              {
+                      "id": 19,
+                      "name": "Task"
+              },
+              {
+                      "id": 20,
+                      "name": "Unit test"
+              },
+              {
+                      "id": 21,
+                      "name": "Group"
+              },
+              {
+                      "id": 22,
+                      "name": "Pseudo task"
+              }
+      ]
+    }
+}

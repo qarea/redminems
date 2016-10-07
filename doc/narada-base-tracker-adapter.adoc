@@ -16,10 +16,6 @@ This project based on https://gitlab.qarea.org/tgms/narada-tgms-base/tree/master
 
 * Implements all needed JSONRPC2 api calls and provide interface for adapter client
 
-=== tracker package
-
-* Empty implementation of TrackerClient interface
-
 === MySQL
 
 * Removed all MySQL related files, if you need one - take it from narada-tgms-base

@@ -12,6 +12,7 @@ _obj
 _test
 bin
 /.release/*+*
+.release/*+*
 /_live*/
 /VERSION
 

@@ -10,22 +10,21 @@ import (
 var log = narada.NewLog("")
 
 var (
+	// Debug enable debug logs
+	Debug bool
+
 	// LockTimeout for narada.SharedLock
 	LockTimeout time.Duration
 
-	Debug        bool
+	// RSAPublicKey for JWT token verification
 	RSAPublicKey []byte
-	MySQL        struct {
-		Host     string
-		Port     int
-		DB       string
-		Login    string
-		Password string
-	}
+
+	// HTTP configuration for application http server
 	HTTP struct {
 		Listen   string
 		BasePath string
-		//Default timeout for http requests to adapters
+
+		// Default timeout for http requests to adapters
 		Timeout      time.Duration
 		RealIPHeader string
 	}
@@ -51,13 +50,14 @@ func load() error {
 	}
 
 	HTTP.RealIPHeader = narada.GetConfigLine("http/real_ip_header")
-	HTTP.Timeout = narada.GetConfigDuration("http/timeout")
 
 	var err error
 	RSAPublicKey, err = narada.GetConfig("rsa_public_key")
 	if err != nil {
 		return err
 	}
+
+	HTTP.Timeout = narada.GetConfigDuration("http/timeout")
 
 	LockTimeout = narada.GetConfigDuration("lock_timeout")
 	return nil

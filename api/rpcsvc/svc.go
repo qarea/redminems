@@ -3,22 +3,27 @@ package rpcsvc
 
 import (
 	"context"
-	"net"
 	"net/http"
 	"net/rpc"
 
-	"gitlab.qarea.org/tgms/ctxtg"
-
 	"github.com/pkg/errors"
 	"github.com/powerman/narada-go/narada"
-
-	"../../cfg"
-	"../../entities"
-
 	"github.com/powerman/rpc-codec/jsonrpc2"
+
+	"github.com/qarea/ctxtg"
+	"github.com/qarea/redminems/cfg"
+	"github.com/qarea/redminems/entities"
 )
 
 var log = narada.NewLog("rpcsvc: ")
+
+// Init registers JSON-RPC handlers
+func Init(r TrackerClient, p ctxtg.TokenParser) {
+	if err := rpc.Register(newAPI(r, p)); err != nil {
+		log.Fatal(err)
+	}
+	http.Handle(cfg.HTTP.BasePath+"/rpc", jsonrpc2.HTTPHandler(nil))
+}
 
 // TrackerClient required interface for new tracker
 type TrackerClient interface {
@@ -35,14 +40,6 @@ type TrackerClient interface {
 	//TotalReports receive date as UNIX timestamp (seconds) and return total reported time at this day in seconds
 	TotalReports(ctx context.Context, t entities.Tracker, date int64) (int64, error)
 	CreateReport(context.Context, entities.Tracker, entities.ProjectID, entities.Report) error
-}
-
-// Init registers JSON-RPC handlers
-func Init(r TrackerClient, p ctxtg.TokenParser) {
-	if err := rpc.Register(newAPI(r, p)); err != nil {
-		log.Fatal(err)
-	}
-	http.Handle(cfg.HTTP.BasePath+"/rpc", jsonrpc2.HTTPHandler(nil))
 }
 
 func newAPI(r TrackerClient, p ctxtg.TokenParser) *API {
@@ -196,15 +193,8 @@ func errWithLog(ctx ctxtg.Context, prefix string, err error) error {
 	}
 	log.ERR("tracking id: %s, token: %s, %s: %+v", ctx.TracingID, ctx.Token, prefix, err)
 	err = errors.Cause(err)
-	if err == context.DeadlineExceeded || isHTTPTimeoutErr(err) {
+	if err == context.DeadlineExceeded {
 		return entities.ErrTimeout
 	}
 	return err
-}
-
-func isHTTPTimeoutErr(err error) bool {
-	if err, ok := err.(net.Error); ok && err.Timeout() {
-		return true
-	}
-	return false
 }

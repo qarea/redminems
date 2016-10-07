@@ -1,8 +1,8 @@
 package rpcsvc
 
 import (
-	"../../entities"
-	"gitlab.qarea.org/tgms/ctxtg"
+	"github.com/qarea/ctxtg"
+	"github.com/qarea/redminems/entities"
 )
 
 // ProjectsReq input parameter to GetProjects
