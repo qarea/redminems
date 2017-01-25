@@ -1073,7 +1073,7 @@ func TestIssueByURLInvalidURL(t *testing.T) {
 
 	r := NewClient(testTimeout())
 	_, err := r.IssueByURL(context.Background(), tr, issurl)
-	if err != entities.ErrIssueURL {
+	if errors.Cause(err) != entities.ErrIssueURL {
 		t.Fatal(err)
 	}
 }
