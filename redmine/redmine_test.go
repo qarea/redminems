@@ -12,11 +12,13 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/qarea/redminems/entities"
 )
@@ -453,6 +455,14 @@ func TestProjectIssuesReqInternalErr(t *testing.T) {
 	assertErr(t, err, entities.ErrRemoteServer)
 }
 
+func TestProjectIssueResourceEmptyPage(t *testing.T) {
+	result := projectIssuesResource(1, entities.Pagination{})
+	expected := "/projects/1/issues.json?offset=0&limit=100&assigned_to_id=me"
+	if result != expected {
+		t.Error("Unexpected result", result)
+	}
+}
+
 func TestIssueByIDReq(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != get {
@@ -466,11 +476,16 @@ func TestIssueByIDReq(t *testing.T) {
 	defer ts.Close()
 
 	r := NewClient(testTimeout())
-	issue, err := r.issue(context.Background(), entities.Tracker{
-		Credentials: testCreds,
-		URL:         ts.URL,
-		Type:        redmineType,
-	}, 3)
+	issue, err := r.Issue(
+		context.Background(),
+		entities.Tracker{
+			Credentials: testCreds,
+			URL:         ts.URL,
+			Type:        redmineType,
+		},
+		0,
+		3,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -860,6 +875,511 @@ func TestTotalReportsReqInternalErr(t *testing.T) {
 		date,
 	)
 	assertErr(t, err, entities.ErrRemoteServer)
+}
+
+func TestUpdateIssueProgress(t *testing.T) {
+	is := entities.IssueID(3)
+	prog := entities.Progress(4)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != put {
+			t.Errorf("Invalid method %s", r.Method)
+		}
+		if r.URL.Path != "/issues/"+strconv.Itoa(int(is))+".json" {
+			t.Errorf("Unexpected resource path %s", r.URL.Path)
+		}
+		var ir issueRoot
+		unmarshal(t, r.Body, &ir)
+		if ir.Issue.ID != int64(is) ||
+			ir.Issue.DoneRatio != int(prog) {
+			t.Error("Invalid issue passed to the server")
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	err := r.UpdateIssueProgress(context.Background(), tr, 0, is, prog)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUpdateIssueProgressError(t *testing.T) {
+	is := entities.IssueID(3)
+	prog := entities.Progress(4)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != put {
+			t.Errorf("Invalid method %s", r.Method)
+		}
+		if r.URL.Path != "/issues/"+strconv.Itoa(int(is))+".json" {
+			t.Errorf("Unexpected resource path %s", r.URL.Path)
+		}
+		var ir issueRoot
+		unmarshal(t, r.Body, &ir)
+		if ir.Issue.ID != int64(is) ||
+			ir.Issue.DoneRatio != int(prog) {
+			t.Error("Invalid issue passed to the server")
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	err := r.UpdateIssueProgress(context.Background(), tr, 0, is, prog)
+	if err == nil {
+		t.Error("Error expected")
+	}
+}
+
+func TestFullUpdateIssue(t *testing.T) {
+	testIssue := *issueJSON
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == get {
+			w.Write(readTestFile(t, issueFile))
+		}
+		if r.URL.Path != "/issues/"+strconv.Itoa(int(testIssue.ID))+".json" {
+			t.Errorf("Unexpected resource path %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer ts.Close()
+
+	r := NewClient(testTimeout())
+	_, err := r.UpdateIssue(
+		context.Background(),
+		entities.Tracker{
+			Credentials: testCreds,
+			URL:         ts.URL,
+			Type:        redmineType,
+		},
+		0,
+		testIssue,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFullUpdateIssueError(t *testing.T) {
+	testIssue := *issueJSON
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == get {
+			w.Write(readTestFile(t, issueFile))
+		}
+		if r.URL.Path != "/issues/"+strconv.Itoa(int(testIssue.ID))+".json" {
+			t.Errorf("Unexpected resource path %s", r.URL.Path)
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer ts.Close()
+
+	r := NewClient(testTimeout())
+	_, err := r.UpdateIssue(
+		context.Background(),
+		entities.Tracker{
+			Credentials: testCreds,
+			URL:         ts.URL,
+			Type:        redmineType,
+		},
+		0,
+		testIssue,
+	)
+	if err == nil {
+		t.Error("Error expect")
+	}
+}
+
+func TestCreateIssue(t *testing.T) {
+	pid := entities.ProjectID(0)
+	testIssue := entities.NewIssue{Issue: *issueJSON}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		if r.URL.Path == "/users/current.json" {
+			fmt.Println("users")
+			w.Write(readTestFile(t, userFile))
+		}
+		if r.URL.Path == "/projects/0/issues.json" {
+			fmt.Println("issues")
+			w.WriteHeader(http.StatusCreated)
+			io.Copy(w, r.Body)
+		}
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.CreateIssue(context.Background(), tr, testIssue, pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCreateIssueWithServerError(t *testing.T) {
+	pid := entities.ProjectID(0)
+	testIssue := entities.NewIssue{Issue: *issueJSON}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		io.Copy(w, r.Body)
+	},
+	))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.CreateIssue(context.Background(), tr, testIssue, pid)
+	if err == nil {
+		t.Error("Error expected")
+	}
+}
+
+func TestIssueByURLInvalidURL(t *testing.T) {
+	issurl := entities.IssueURL("https")
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.IssueByURL(context.Background(), tr, issurl)
+	if err != entities.ErrIssueURL {
+		t.Fatal(err)
+	}
+}
+
+func TestIssueByURL(t *testing.T) {
+
+	issurl := entities.IssueURL("https://redmine.qarea.org/issues/80193")
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		w.Write(readTestFile(t, issueFile))
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.IssueByURL(context.Background(), tr, issurl)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestIssueByURLWithServerError(t *testing.T) {
+	issurl := entities.IssueURL("https://redmine.qarea.org/issues/80193")
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		io.Copy(w, r.Body)
+	},
+	))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.IssueByURL(context.Background(), tr, issurl)
+	if err == nil {
+		t.Error("Error expected")
+	}
+}
+
+func TestProjectIssuesErr(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/projects/1/issues.json") {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, _, err := r.ProjectIssues(context.Background(), tr, 1, page)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectIssuesErrorAsync(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/projects/1/issues.json") {
+			w.Write(readTestFile(t, issuesFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/issues") {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, _, err := r.ProjectIssues(context.Background(), tr, 1, page)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectIssues(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/projects/1/issues.json") {
+			w.Write(readTestFile(t, issuesFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/issues") {
+			w.Write(readTestFile(t, issueFile))
+		}
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	iss, _, err := r.ProjectIssues(context.Background(), tr, 1, page)
+	if len(iss) == 0 {
+		t.Error("Should return issues")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjects(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/projects") {
+			w.Write(readTestFile(t, projectsFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/enumerations/time_entry_activities.json") {
+			w.Write(readTestFile(t, timeentriesFile))
+		}
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	prs, _, err := r.Projects(context.Background(), tr, page)
+	if len(prs) == 0 {
+		t.Error("Should return projects")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectActivityErr(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/project") {
+			w.Write(readTestFile(t, projectFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/enumerations/time_entry_activities.json") {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.Project(context.Background(), tr, 1)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectsErr(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, _, err := r.Projects(context.Background(), tr, page)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProject(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/project") {
+			w.Write(readTestFile(t, projectFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/enumerations/time_entry_activities.json") {
+			w.Write(readTestFile(t, timeentriesFile))
+		}
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	pr, err := r.Project(context.Background(), tr, 1)
+	if pr == nil {
+		t.Error("Should return project")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectsActivityErr(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/projects") {
+			w.Write(readTestFile(t, projectsFile))
+		}
+		if strings.HasPrefix(r.URL.Path, "/enumerations/time_entry_activities.json") {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	defer ts.Close()
+
+	page := entities.Pagination{
+		Offset: 41,
+		Limit:  88,
+	}
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, _, err := r.Projects(context.Background(), tr, page)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestProjectErr(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer ts.Close()
+
+	tr := entities.Tracker{
+		Credentials: testCreds,
+		URL:         ts.URL,
+		Type:        redmineType,
+	}
+
+	r := NewClient(testTimeout())
+	_, err := r.Project(context.Background(), tr, 1)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDateToSeconds(t *testing.T) {
+	// Zero on empty string
+	if dateToSeconds("") != 0 {
+		t.Error("invalid result")
+	}
+	// Zero on invalid format
+	if dateToSeconds("one") != 0 {
+		t.Error("invalid result")
+	}
+}
+
+func TestExternalSvcErr(t *testing.T) {
+	// Error on invalid json
+	assert.Error(t, toExternalServiceErr([]byte("123")))
 }
 
 func assertErr(t *testing.T, actual, expected error) {
